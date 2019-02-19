@@ -3,7 +3,7 @@
 FROM ubuntu:bionic as builder
 
 # This should match the version in your .meteor/release
-ENV METEOR_VERSION 1.8.0.1
+ENV METEOR_VERSION 1.8.0.2
 
 # Path to app code, relative to this Dockerfile
 ENV APP_SRC_FOLDER .
