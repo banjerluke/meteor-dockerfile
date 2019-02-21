@@ -1,0 +1,37 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      mkdir tmp
+      (docker pull gcr.io/$PROJECT_ID/meteor-app-builder:$BRANCH_NAME && echo "$BRANCH_NAME" > tmp/base) ||
+        echo "master" > tmp/base
+
+      docker pull "gcr.io/$PROJECT_ID/meteor-app-builder:$(cat tmp/base)" || true
+
+      docker build \
+          --cache-from "gcr.io/$PROJECT_ID/meteor-app-builder:$(cat tmp/base)" \
+          -t gcr.io/$PROJECT_ID/meteor-app-builder:$BRANCH_NAME \
+          -t gcr.io/$PROJECT_ID/meteor-app-builder:$COMMIT_SHA \
+          -t gcr.io/$PROJECT_ID/meteor-app-builder:latest \
+          --build-arg COMMIT_SHA=$COMMIT_SHA \
+          --target builder \
+          .
+
+      docker build \
+          --cache-from "gcr.io/$PROJECT_ID/meteor-app-builder:$COMMIT_SHA" \
+          -t gcr.io/$PROJECT_ID/meteor-app:$BRANCH_NAME \
+          -t gcr.io/$PROJECT_ID/meteor-app:$COMMIT_SHA \
+          -t gcr.io/$PROJECT_ID/meteor-app:latest \
+          --build-arg COMMIT_SHA=$COMMIT_SHA \
+          .
+timeout: 1200s
+images: [
+  'gcr.io/$PROJECT_ID/meteor-app-builder:$COMMIT_SHA',
+  'gcr.io/$PROJECT_ID/meteor-app-builder:$BRANCH_NAME',
+  'gcr.io/$PROJECT_ID/meteor-app-builder:latest',
+  'gcr.io/$PROJECT_ID/meteor-app:$COMMIT_SHA',
+  'gcr.io/$PROJECT_ID/meteor-app:$BRANCH_NAME',
+  'gcr.io/$PROJECT_ID/meteor-app:latest'
+]
