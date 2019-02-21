@@ -24,7 +24,7 @@ The easiest way to try this out after you've set up your Dockerfile is to copy t
 
 ## Notes
 
-This is a generic Meteor deployment Dockerfile, with no app-specific code.
+This is a generic Meteor deployment Dockerfile, with no app-specific code other than making the git commit hash accessible within Meteor by injecting it into the `process.env.COMMIT_ID` variable. If you don't want to do that, just delete that line in the Dockerfile.
 
 During the "Building Meteor bundle" step, you'll see a warning about the `--allow-superuser` flag. This warning is irrelevant in this case and can be safely ignored.
 

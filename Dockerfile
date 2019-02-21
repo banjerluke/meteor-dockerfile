@@ -34,6 +34,10 @@ RUN echo '\n[*] Building Meteor bundle' \
 # You can safely ignore it, as it doesn't apply here. The server *is* being built, silently.
 # If the process gets killed after awhile, it's probably because the Docker VM ran out of memory.
 
+# Inject git commit into server boot; only necessary if you want the git commit hash to be 
+# accessible as an environment variable in your Meteor app
+RUN (echo "process.env.COMMIT_ID = '$(git rev-parse HEAD)';"; cat $BUILD_OUTPUT_FOLDER/bundle/main.js) > new-main.js && mv new-main.js $BUILD_OUTPUT_FOLDER/bundle/main.js
+
 
 # --- Stage 2: install server dependencies and run Node server ---
 
