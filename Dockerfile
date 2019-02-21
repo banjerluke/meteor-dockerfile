@@ -1,27 +1,22 @@
 # --- Stage 1: build Meteor app and install its NPM dependencies ---
 
-FROM ubuntu:bionic as builder
+# Make sure both this and the FROM line further down match the
+# version of Node expected by your version of Meteor -- see https://docs.meteor.com/changelog.html
+FROM node:8.11.4 as builder
 
-# This should match the version in your .meteor/release
-ENV METEOR_VERSION 1.8.0.2
+# METEOR_VERSION should match the version in your .meteor/release
+# APP_SRC_FOLDER is path the your app code relative to this Dockerfile
+# BUILD_SRC_FOLDER is where app code is copied into the container
+# BUILD_OUTPUT_FOLDER is where app code is built within the container (there's a matching ENV line in the second stage)
+ENV METEOR_VERSION=1.8.0.2 \
+    APP_SRC_FOLDER=. \
+    BUILD_SRC_FOLDER=/opt/src \
+    BUILD_OUTPUT_FOLDER=/opt/app
 
-# Path to app code, relative to this Dockerfile
-ENV APP_SRC_FOLDER .
-
-# Path where app code is copied into the container
-ENV BUILD_SRC_FOLDER /opt/src
-
-# Path where app code is built within the container (there's a matching ENV line in the second stage)
-ENV BUILD_OUTPUT_FOLDER /opt/app
-
-RUN mkdir --parents $BUILD_OUTPUT_FOLDER $BUILD_SRC_FOLDER
-
-RUN echo '\n[*] Installing build dependencies (this might take awhile)' \
-&& apt-get -q -o=Dpkg::Use-Pty=0 update \
-&& apt-get --yes -q -o=Dpkg::Use-Pty=0 install curl build-essential git
+RUN mkdir -p $BUILD_OUTPUT_FOLDER $BUILD_SRC_FOLDER
 
 RUN echo "\n[*] Installing Meteor ${METEOR_VERSION} to ${HOME}"\
-&& curl https://install.meteor.com/?release=${METEOR_VERSION} | sed s/--progress-bar/-sL/g | sh
+&& curl -s https://install.meteor.com/?release=${METEOR_VERSION} | sed s/--progress-bar/-sL/g | sh
 
 WORKDIR $BUILD_SRC_FOLDER
 
@@ -42,7 +37,6 @@ RUN echo '\n[*] Building Meteor bundle' \
 
 # --- Stage 2: install server dependencies and run Node server ---
 
-# Use the version of Node expected by your Meteor release -- see https://docs.meteor.com/changelog.html
 FROM node:8.11.4-alpine as runner
 
 ENV BUILD_OUTPUT_FOLDER /opt/app
