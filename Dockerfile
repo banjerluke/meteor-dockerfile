@@ -61,7 +61,7 @@ COPY --from=builder $BUILD_OUTPUT_FOLDER $BUILD_OUTPUT_FOLDER/
 # Install NPM dependencies for the Meteor server, then remove OS build dependencies
 RUN echo '\n[*] Installing Meteor server NPM dependencies' \
 && cd $BUILD_OUTPUT_FOLDER/bundle/programs/server/ \
-&& npm install \
+&& npm install && npm run install --production \
 && apk del .node-gyp-compilation-dependencies
 
 # Move into bundle folder
