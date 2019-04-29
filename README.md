@@ -14,7 +14,7 @@ Pascal Kaufmann ([pozylon/meteor-docker-auto](https://github.com/pozylon/meteor-
 
 2. Edit the `ENV METEOR_VERSION` line to match your Meteor version (as shown in your app's `.meteor/release`).
 
-3. Edit the two `FROM node:8.11.4...` lines to match the version of Node used by your version of Meteor (check the [Meteor changelog](https://docs.meteor.com/changelog.html) to see what Node version is being used).
+3. Edit the two `FROM node:8.15.1...` lines to match the version of Node used by your version of Meteor (check the [Meteor changelog](https://docs.meteor.com/changelog.html) to see what Node version is being used).
 
 If you'd like to put your Dockerfile in a directory other than your Meteor app root, be sure to change `APP_SRC_FOLDER=.` to be equal to your app root directory (relative to the Dockerfile).
 
@@ -30,10 +30,12 @@ The `cloudbuild.yaml` file also increases the build timeout to 20 minutes (`time
 
 ## Notes
 
-This is a generic Meteor deployment Dockerfile, with no app-specific code other than making the git commit hash accessible within Meteor by injecting it into the `process.env.COMMIT_ID` variable. If you don't want to do that, just delete that line in the Dockerfile.
+This is a generic Meteor deployment Dockerfile, with no app-specific code.
 
 During the "Building Meteor bundle" step, you'll see a warning about the `--allow-superuser` flag. This warning is irrelevant in this case and can be safely ignored.
 
 If the process is killed while building the bundle, it is probably because it ran out of memory. Make sure you have enough RAM available in the Docker VM if applicable. (I need 2+ GB to build my app successfully. Ended up moving the building to Google Cloud Build which offers 120 free build minutes a day and no memory issues so far.)
 
 Needless to say, don't forget to update this Dockerfile when you update your Meteor deployment! (Perhaps this step could be automated, but I prefer to simply add it to my manual process during Meteor release upgrades.)
+
+A previous version of this Dockerfile modified the built Node server to inject an environment variable with the git commit hash, but since Meteor 1.8.1 that is no longer necessary since you can use [Meteor.gitCommitHash](https://github.com/meteor/meteor/pull/10442).
